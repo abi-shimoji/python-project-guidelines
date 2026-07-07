@@ -1,0 +1,72 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "uv sync",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "sync"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/template"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ruff format",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "ruff",
+        "format"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/template"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ruff check",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "ruff",
+        "check"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/template"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "ty check",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "ty",
+        "check"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/template"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "pytest",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "pytest"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/template"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

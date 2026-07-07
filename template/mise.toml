@@ -1,0 +1,38 @@
+[tools]
+uv = "latest"
+
+[tasks.format]
+run = "uv run ruff format"
+description = "run ruff format"
+
+[tasks.lint]
+run = "uv run ruff check"
+description = "run ruff check"
+
+[tasks.typecheck]
+run = "uv run ty check"
+description = "run ty check"
+
+[tasks.test]
+run = "uv run pytest"
+description = "run pytest"
+
+[tasks.check]
+depends = ["lint", "typecheck", "test"]
+description = "run lint, typecheck, test"
+
+[tasks.all]
+depends = ["format", "lint", "typecheck", "test"]
+description = "run format, lint, typecheck, test"
+
+[tasks.help]
+run = """
+printf "%s\n" \
+"mise run format     - run ruff format" \
+"mise run lint       - run ruff check" \
+"mise run typecheck  - run ty check" \
+"mise run test       - run pytest" \
+"mise run check      - run lint, typecheck, test" \
+"mise run all        - run format, lint, typecheck, test"
+"""
+description = "show available tasks"

@@ -1,0 +1,18 @@
+{
+  "languages": {
+    "Python": {
+      "language_servers": ["ty", "ruff", "!basedpyright", "!pyright", "!pylsp"],
+      "format_on_save": "on",
+      "tab_size": 4,
+      "code_actions_on_format": {
+        "source.organizeImports.ruff": true
+      },
+      "formatter": {
+        "language_server": {
+          "name": "ruff"
+        }
+      }
+    }
+  },
+  "tab_size": 2
+}
