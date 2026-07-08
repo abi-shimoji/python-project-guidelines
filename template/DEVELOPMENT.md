@@ -2,20 +2,44 @@
 
 この文書は、このプロジェクトを開発・保守する人向けの手順をまとめたもの。
 
-- `README.md`: プロジェクトの概要と開始方法
-- `DEVELOPMENT.md`: 開発手順、依存追加、品質確認、CI 運用
+- `README.md`: プロジェクトの概要、テンプレートの使い方、最小限の開始方法
+- `DEVELOPMENT.md`: セットアップ、実行、依存追加、品質確認、コメントルール、CI 運用
 
 ## Setup
+
+`uv` を直接使う場合:
 
 ```bash
 uv sync
 ```
 
-## Common Commands
+`mise` 経由で `uv` を使う場合:
+
+```bash
+mise x -- uv sync
+```
+
+## Run
+
+`uv` を直接使う場合:
 
 ```bash
 uv run python -m src
 uv run sample-project
+```
+
+`mise` 経由で実行する場合:
+
+```bash
+mise x -- uv run python -m src
+mise x -- uv run sample-project
+```
+
+## Quality Checks
+
+`uv` を直接使う場合:
+
+```bash
 uv run ruff format
 uv run ruff check
 uv run ty check
@@ -50,21 +74,17 @@ mise run all
 
 ## Add Dependencies
 
+通常の依存関係を追加する場合:
+
 ```bash
 uv add requests
-uv add --dev pytest
-uv add --dev ruff ty
 ```
 
-## mise
-
-`mise` を利用する場合は、`uv` を `mise x` 経由で実行してよい。
+開発用の依存関係を追加する場合:
 
 ```bash
-mise x -- uv sync
-mise x -- uv run ruff check
-mise x -- uv run ty check
-mise x -- uv run pytest
+uv add --dev pytest
+uv add --dev ruff ty
 ```
 
 ## GitHub Actions

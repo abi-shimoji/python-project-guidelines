@@ -1,6 +1,8 @@
-# AGENT.md
+# AGENTS.md
 
 このリポジトリで作業する AI / 自動化エージェントは、以下の前提に従うこと。
+
+作業前に [DEVELOPMENT.md](./DEVELOPMENT.md) を確認し、セットアップ、実行、依存追加、品質確認、コメント・docstring、CI の運用ルールに従う。
 
 ## 基本方針
 
@@ -43,3 +45,4 @@ mise x -- uv run ruff check
 - 依存追加は `uv add` / `uv add --dev` を使う
 - 実行は `uv run` を使う
 - 修正後は必要に応じて `uv run ruff format`、`uv run ruff check`、`uv run ty check`、`uv run pytest` を実行する
+- 開発手順やドキュメント方針に迷う場合は [DEVELOPMENT.md](./DEVELOPMENT.md) を優先する
