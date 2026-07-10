@@ -1,6 +1,6 @@
-# python-project-guidelines
+# Python 開発ガイドライン
 
-このリポジトリは、Python プロジェクトの開発運用を揃えるためのガイドラインを管理するためのものです。
+このディレクトリは、Python プロジェクトの開発運用を揃えるためのガイドラインを管理するためのものです。
 
 - `PYTHON_GUIDELINES.md`: Python 開発時の標準ツールと運用方針
 - `RUFF_LINT_GUIDE.md`: `ruff` の lint 運用ガイド

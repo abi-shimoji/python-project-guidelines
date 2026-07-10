@@ -1,6 +1,6 @@
-# git-development-guidelines
+# Git 開発ガイドライン
 
-このリポジトリは、Git を使った開発運用のガイドラインを管理するためのものです。
+このディレクトリは、Git を使った開発運用のガイドラインを管理するためのものです。
 
 - `GIT_GUIDELINES.md`: Git 開発時の基本方針と標準ワークフロー
 - `GIT_COMMANDS.md`: 日常的によく使う Git コマンド集
