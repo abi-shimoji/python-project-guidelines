@@ -4,6 +4,7 @@
 
 - [コンフリクトが起きた](./resolve-conflict.md)
 - [間違ったファイルをステージした](./unstage-wrong-file.md)
+- [GitHubリポジトリへ接続したい](./connect-github-remote.md)
 - [直前コミットのメッセージを修正したい](./amend-commit-message.md)
 - [直前コミットにファイルを追加し忘れた](./amend-missing-file.md)
 - [別作業を急ぎで挟みたい](./stash-for-urgent-work.md)
