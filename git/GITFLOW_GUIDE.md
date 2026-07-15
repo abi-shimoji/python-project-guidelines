@@ -15,13 +15,13 @@ flowchart LR
   hotfix[hotfix/*]
 
   develop -->|通常開発用に作成| feature
-  feature -->|完了後に統合| develop
+  feature -->|PRで統合| develop
   develop -->|リリース準備用に作成| release
-  release -->|本番リリースしてタグ付け| main
-  release -->|リリース調整を戻す| develop
+  release -->|PRで本番反映・タグ付け| main
+  release -->|PRでリリース調整を戻す| develop
   main -->|本番障害対応用に作成| hotfix
-  hotfix -->|緊急リリースしてタグ付け| main
-  hotfix -->|修正を次回開発へ反映| develop
+  hotfix -->|PRで緊急リリース・タグ付け| main
+  hotfix -->|PRで修正を次回開発へ反映| develop
 ```
 
 主な流れ:
@@ -30,6 +30,24 @@ flowchart LR
 - `release/*` は `develop` から作成し、完了後に `main` と `develop` へ戻す
 - `hotfix/*` は `main` から作成し、完了後に `main` と `develop` へ戻す
 - リリースタグは `main` 上のリリースコミットに付ける
+
+## 0. 前提と判断基準
+
+このガイドでは、リモートリポジトリを `origin`、本番ブランチを `main` とする。
+
+- `main` と `develop` は保護ブランチとし、原則として PR 経由で変更する
+- ブランチを作成する前に、元ブランチを最新化する
+- マージ前にテスト、レビュー、差分、対象ブランチを確認する
+- マージ後はリモートへ反映し、不要になった作業ブランチを削除する
+- コンフリクトが発生した場合は、解消内容を確認してからテストを再実行する
+
+| ブランチ | 作成元 | 主な反映先 |
+| --- | --- | --- |
+| `feature/*` | `develop` | `develop` |
+| `release/*` | `develop` | `main` と `develop` |
+| `hotfix/*` | `main` | `main` と `develop` |
+
+`release/*` と `hotfix/*` は、`main` への反映だけで完了としない。同じ修正を `develop` にも反映し、反映結果を確認してからブランチを削除する。
 
 ## 1. 基本方針
 
@@ -57,8 +75,9 @@ flowchart LR
 
 ```bash
 git switch main
+git pull --ff-only
 git merge --no-ff release/1.2.0
-git tag v1.2.0
+git tag -a v1.2.0 -m "Release v1.2.0"
 git push origin main --tags
 ```
 
@@ -148,7 +167,7 @@ git switch -c release/1.2.0
 git switch main
 git pull --ff-only
 git merge --no-ff release/1.2.0
-git tag v1.2.0
+git tag -a v1.2.0 -m "Release v1.2.0"
 git push origin main --tags
 
 git switch develop
@@ -157,6 +176,7 @@ git merge --no-ff release/1.2.0
 git push origin develop
 
 git branch -d release/1.2.0
+git push origin --delete release/1.2.0
 ```
 
 注意:
@@ -192,7 +212,7 @@ git switch -c hotfix/fix-login-error
 git switch main
 git pull --ff-only
 git merge --no-ff hotfix/fix-login-error
-git tag v1.2.1
+git tag -a v1.2.1 -m "Hotfix v1.2.1"
 git push origin main --tags
 
 git switch develop
@@ -201,6 +221,7 @@ git merge --no-ff hotfix/fix-login-error
 git push origin develop
 
 git branch -d hotfix/fix-login-error
+git push origin --delete hotfix/fix-login-error
 ```
 
 注意:
@@ -209,9 +230,18 @@ git branch -d hotfix/fix-login-error
 - 無関係なリファクタリングやフォーマット変更を混ぜない
 - `develop` への反映漏れを防ぐ
 
+### 2.6 マージ方法の選択
+
+- 通常は PR を作成し、レビューと CI の成功を確認してからマージする
+- ローカルで直接マージする場合も、レビューとテストを省略しない
+- `release/*` と `hotfix/*` は、`main` 向けと `develop` 向けの反映を別々に確認する
+- 同じブランチから複数の PR を作成できない場合は、`main` へのマージ後に `main` から `develop` へ反映する専用 PR を作成する
+
 ## 3. 標準ワークフロー
 
 ### 3.1 機能開発
+
+図中の `merge` は、レビューと CI 確認済みの PR を `develop` に取り込む流れを表す。
 
 ```mermaid
 gitGraph
@@ -227,7 +257,7 @@ gitGraph
   commit id: "implement"
   commit id: "test"
 
-  %% 完了した feature/* は develop に戻す。main へ直接入れない
+  %% 完了した feature/* はPRで develop に戻す。main へ直接入れない
   checkout develop
   merge feature/add-report-export
 ```
@@ -243,11 +273,15 @@ git switch develop
 git pull --ff-only
 git merge --no-ff feature/add-report-export
 git push origin develop
+git branch -d feature/add-report-export
+git push origin --delete feature/add-report-export
 ```
 
 PR を使う場合は、`feature/*` から `develop` へ PR を作成する。
 
 ### 3.2 リリース
+
+図中の `main` と `develop` への `merge` は、それぞれ承認済みの PR による反映を表す。`main` への反映後、同じ `release/*` を `develop` にも反映する。
 
 ```mermaid
 gitGraph
@@ -263,11 +297,11 @@ gitGraph
   commit id: "version bump"
   commit id: "release fix"
 
-  %% release/* を main に入れてリリースタグを付ける
+  %% release/* をPRで main に入れてリリースタグを付ける
   checkout main
   merge release/1.2.0 tag: "v1.2.0"
 
-  %% release/* で行った調整は develop にも必ず戻す
+  %% main への反映後、release/* で行った調整をPRで develop にも必ず戻す
   checkout develop
   merge release/1.2.0
 ```
@@ -280,16 +314,22 @@ git switch -c release/1.2.0
 # バージョン更新、リリースノート更新、最終確認
 
 git switch main
+git pull --ff-only
 git merge --no-ff release/1.2.0
-git tag v1.2.0
+git tag -a v1.2.0 -m "Release v1.2.0"
 git push origin main --tags
 
 git switch develop
+git pull --ff-only
 git merge --no-ff release/1.2.0
 git push origin develop
+git branch -d release/1.2.0
+git push origin --delete release/1.2.0
 ```
 
 ### 3.3 緊急修正
+
+図中の `main` と `develop` への `merge` は、それぞれ承認済みの PR による反映を表す。緊急リリース後、同じ `hotfix/*` を `develop` にも反映する。
 
 ```mermaid
 gitGraph
@@ -305,11 +345,11 @@ gitGraph
   checkout hotfix/fix-payment-timeout
   commit id: "hotfix"
 
-  %% hotfix/* を main に入れて緊急リリースタグを付ける
+  %% hotfix/* をPRで main に入れて緊急リリースタグを付ける
   checkout main
   merge hotfix/fix-payment-timeout tag: "v1.2.1"
 
-  %% 同じ修正を develop にも戻し、次回リリースで欠落しないようにする
+  %% main への反映後、同じ修正をPRで develop にも戻す
   checkout develop
   merge hotfix/fix-payment-timeout
 ```
@@ -322,13 +362,17 @@ git switch -c hotfix/fix-payment-timeout
 # 修正、テスト、コミット
 
 git switch main
+git pull --ff-only
 git merge --no-ff hotfix/fix-payment-timeout
-git tag v1.2.1
+git tag -a v1.2.1 -m "Hotfix v1.2.1"
 git push origin main --tags
 
 git switch develop
+git pull --ff-only
 git merge --no-ff hotfix/fix-payment-timeout
 git push origin develop
+git branch -d hotfix/fix-payment-timeout
+git push origin --delete hotfix/fix-payment-timeout
 ```
 
 ## 4. コミットと PR のルール
@@ -343,8 +387,8 @@ git push origin develop
 PR の向き先:
 
 - `feature/*` -> `develop`
-- `release/*` -> `main`
-- `hotfix/*` -> `main`
+- `release/*` -> `main`、`develop`
+- `hotfix/*` -> `main`、`develop`
 
 `release/*` と `hotfix/*` を `main` へ反映した後は、必ず `develop` にも反映する。
 
@@ -354,8 +398,9 @@ PR の向き先:
 
 ```bash
 git switch main
-git tag v1.2.0
-git push origin v1.2.0
+git pull --ff-only
+git tag -a v1.2.0 -m "Release v1.2.0"
+git push origin main v1.2.0
 ```
 
 推奨:
