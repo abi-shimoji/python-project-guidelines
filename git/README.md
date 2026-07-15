@@ -3,6 +3,7 @@
 このディレクトリは、Git を使った開発運用のガイドラインを管理するためのものです。
 
 - `GIT_GUIDELINES.md`: Git 開発時の基本方針と標準ワークフロー
+- `GITFLOW_GUIDE.md`: Gitflow を採用する場合のブランチ構成と運用手順
 - `GIT_COMMANDS.md`: 日常的によく使う Git コマンド集
 - `GITHUB_INTEGRATION_GUIDE.md`: Git と GitHub の連携手順
 - `COMMIT_MESSAGE_GUIDE.md`: Conventional Commits に基づくコミットメッセージ運用
