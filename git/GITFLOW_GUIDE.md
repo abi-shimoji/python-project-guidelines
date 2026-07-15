@@ -7,33 +7,21 @@ Gitflow は、リリース作業が明確に分かれているプロジェクト
 ## Gitflow の全体像
 
 ```mermaid
-gitGraph
-  commit id: "v1.0.0"
-  branch develop
-  checkout develop
-  commit id: "develop start"
-  branch feature/login
-  checkout feature/login
-  commit id: "login work"
-  commit id: "login test"
-  checkout develop
-  merge feature/login
-  branch release/1.1.0
-  checkout release/1.1.0
-  commit id: "version bump"
-  commit id: "release fix"
-  checkout main
-  merge release/1.1.0 tag: "v1.1.0"
-  checkout develop
-  merge release/1.1.0
-  checkout main
-  branch hotfix/login-error
-  checkout hotfix/login-error
-  commit id: "hotfix"
-  checkout main
-  merge hotfix/login-error tag: "v1.1.1"
-  checkout develop
-  merge hotfix/login-error
+flowchart LR
+  main[main]
+  develop[develop]
+  feature[feature/*]
+  release[release/*]
+  hotfix[hotfix/*]
+
+  develop -->|通常開発用に作成| feature
+  feature -->|完了後に統合| develop
+  develop -->|リリース準備用に作成| release
+  release -->|本番リリースしてタグ付け| main
+  release -->|リリース調整を戻す| develop
+  main -->|本番障害対応用に作成| hotfix
+  hotfix -->|緊急リリースしてタグ付け| main
+  hotfix -->|修正を次回開発へ反映| develop
 ```
 
 主な流れ:
@@ -225,6 +213,25 @@ git branch -d hotfix/fix-login-error
 
 ### 3.1 機能開発
 
+```mermaid
+gitGraph
+  %% main の最新リリースから develop が分岐している状態
+  commit id: "v1.1.0"
+  branch develop
+  checkout develop
+  commit id: "develop"
+
+  %% develop から feature/* を作成し、機能単位で作業する
+  branch feature/add-report-export
+  checkout feature/add-report-export
+  commit id: "implement"
+  commit id: "test"
+
+  %% 完了した feature/* は develop に戻す。main へ直接入れない
+  checkout develop
+  merge feature/add-report-export
+```
+
 ```bash
 git switch develop
 git pull --ff-only
@@ -241,6 +248,29 @@ git push origin develop
 PR を使う場合は、`feature/*` から `develop` へ PR を作成する。
 
 ### 3.2 リリース
+
+```mermaid
+gitGraph
+  %% main の最新リリースから develop が分岐している状態
+  commit id: "v1.1.0"
+  branch develop
+  checkout develop
+  commit id: "features ready"
+
+  %% リリース対象が揃ったら develop から release/* を作成する
+  branch release/1.2.0
+  checkout release/1.2.0
+  commit id: "version bump"
+  commit id: "release fix"
+
+  %% release/* を main に入れてリリースタグを付ける
+  checkout main
+  merge release/1.2.0 tag: "v1.2.0"
+
+  %% release/* で行った調整は develop にも必ず戻す
+  checkout develop
+  merge release/1.2.0
+```
 
 ```bash
 git switch develop
@@ -260,6 +290,29 @@ git push origin develop
 ```
 
 ### 3.3 緊急修正
+
+```mermaid
+gitGraph
+  %% main は本番リリース済み、develop では次回作業が進んでいる状態
+  commit id: "v1.2.0"
+  branch develop
+  checkout develop
+  commit id: "next work"
+
+  %% 緊急修正は本番状態である main から hotfix/* を作成する
+  checkout main
+  branch hotfix/fix-payment-timeout
+  checkout hotfix/fix-payment-timeout
+  commit id: "hotfix"
+
+  %% hotfix/* を main に入れて緊急リリースタグを付ける
+  checkout main
+  merge hotfix/fix-payment-timeout tag: "v1.2.1"
+
+  %% 同じ修正を develop にも戻し、次回リリースで欠落しないようにする
+  checkout develop
+  merge hotfix/fix-payment-timeout
+```
 
 ```bash
 git switch main
